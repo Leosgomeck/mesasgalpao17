@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reserva de Mesas</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#1a1209;min-height:100vh;display:flex;flex-direction:column}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--dark:#1A1209;--cream:#FAF6EE;
+  --brown:#3D2B1F;--green:#1e5c38;--green-hover:#2a7a4e;--reserved:#5a5a5a;
+  --selected:#C9A84C;--white:#ffffff;
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzI3ChncZPAqkqZUrkCwb2wGkWt7e8AA158tImoARPZZlhCSeNN6VUNBLFjHithvRlVNw/exec';
+const PRECO = 20;
+
+// ─── Mesa data ───────────────────────────────────────────────────────────────
+// tipo: rect6=6 cadeiras retangular, rect4=4, round6=6 redonda, round8=8 redonda grande
+const MESAS = [
+  // Linha 1 – 3 retangulares grandes
+  {id:'1', tipo:'rect6', col:0, row:0},
+  {id:'2', tipo:'rect6', col:1, row:0},
+  {id:'3', tipo:'rect6', col:2, row:0},
+  // Linha 2
+  {id:'4', tipo:'rect6', col:0, row:1},
+  {id:'5', tipo:'rect6', col:1, row:1},
+  {id:'6', tipo:'rect6', col:2, row:1},
+  // Linha 3
+  {id:'7', tipo:'rect6', col:0, row:2},
+  {id:'8', tipo:'rect6', col:1, row:2},
+  {id:'9', tipo:'rect6', col:2, row:2},
+  // Linha 4
+  {id:'10', tipo:'rect6', col:0, row:3},
+  {id:'11', tipo:'rect6', col:1, row:3},
+  // Mesa pequena perto do palco
+  {id:'12', tipo:'rect4', col:0, row:4},
+  {id:'13', tipo:'rect6', col:1, row:4},
+  // Linha 5
+  {id:'14', tipo:'rect6', col:0, row:5},
+  {id:'15', tipo:'rect6', col:1, row:5},
+  // Linha 6
+  {id:'16', tipo:'rect6', col:0, row:6},
+  {id:'17', tipo:'rect6', col:1, row:6},
+  // Linha 7 – pequenas
+  {id:'18', tipo:'rect4', col:0, row:7},
+  {id:'19', tipo:'rect4', col:1, row:7},
+  {id:'20', tipo:'rect4', col:2, row:7},
+  // Linha 8
+  {id:'21', tipo:'rect6', col:0, row:8},
+  {id:'22', tipo:'rect6', col:1, row:8},
+  {id:'23', tipo:'rect6', col:2, row:8},
+  // Linha 9
+  {id:'24', tipo:'rect6', col:0, row:9},
+  {id:'25', tipo:'rect6', col:1, row:9},
+  {id:'26', tipo:'rect6', col:2, row:9},
+  // Linha 10
+  {id:'27', tipo:'rect6', col:0, row:10},
+  {id:'28', tipo:'rect6', col:1, row:10},
+  {id:'29', tipo:'rect6', col:2, row:10},
+  // Mesas redondas direita
+  {id:'R1', tipo:'round8', col:'right', row:0},
+  {id:'R2', tipo:'round6', col:'right', row:1},
+  {id:'R3', tipo:'round6', col:'right', row:2},
+  {id:'R4', tipo:'round8', col:'right', row:3},
+  {id:'R5', tipo:'round8', col:'right', row:8},
+];
+
+const cadeiras = {rect6:6, rect4:4, round6:6, round8:8};
+
+// ─── SVG Table Components ────────────────────────────────────────────────────
+function Chair({x,y,reserved,selected}){
+  return(
+    <circle cx={x} cy={y} r={5.5}
+      fill={selected?'#E8C97A':reserved?'#888':'#fff'}
+      stroke={selected?'#C9A84C':reserved?'#666':'#ccc'}
+      strokeWidth={1}
+    />
+  );
+}
+
+function RectTable({x,y,w,h,chairs,id,reserved,selected,onClick}){
+  const mid=w/2; const midy=h/2;
+  // top chairs evenly spaced
+  const topX = chairs===6?[w*0.2,w*0.5,w*0.8]:[w*0.28,w*0.72];
+  const botX = topX;
+  const fill = reserved?'#5a5a5a':selected?'#C9A84C':'#1e5c38';
+  const textFill = selected?'#1a1209':'#fff';
+  return(
+    <g onClick={!reserved?onClick:undefined} style={{cursor:reserved?'not-allowed':'pointer'}}>
+      {topX.map((cx,i)=><Chair key={'t'+i} x={x+cx} y={y-7} reserved={reserved} selected={selected}/>)}
+      <rect x={x} y={y} width={w} height={h} rx={5} fill={fill} stroke={selected?'#C9A84C':reserved?'#777':'#145c30'} strokeWidth={1.5}/>
+      <text x={x+mid} y={y+midy} textAnchor="middle" dominantBaseline="middle"
+        fontSize={chairs===4?10:11} fontWeight="600" fill={textFill} fontFamily="DM Sans">{id}</text>
+      {botX.map((cx,i)=><Chair key={'b'+i} x={x+cx} y={y+h+7} reserved={reserved} selected={selected}/>)}
+    </g>
+  );
+}
+
+function RoundTable({cx,cy,r,chairs,id,reserved,selected,onClick}){
+  const fill = reserved?'#5a5a5a':selected?'#C9A84C':'#1e5c38';
+  const textFill = selected?'#1a1209':'#fff';
+  const angles = chairs===8
+    ? [0,45,90,135,180,225,270,315]
+    : [0,60,120,180,240,300];
+  const cr = r+9;
+  return(
+    <g onClick={!reserved?onClick:undefined} style={{cursor:reserved?'not-allowed':'pointer'}}>
+      {angles.map((a,i)=>{
+        const rad=a*Math.PI/180;
+        return <Chair key={i} x={cx+cr*Math.sin(rad)} y={cy-cr*Math.cos(rad)} reserved={reserved} selected={selected}/>;
+      })}
+      <circle cx={cx} cy={cy} r={r} fill={fill} stroke={selected?'#C9A84C':reserved?'#777':'#145c30'} strokeWidth={1.5}/>
+      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle"
+        fontSize={11} fontWeight="600" fill={textFill} fontFamily="DM Sans">{id}</text>
+    </g>
+  );
+}
+
+// ─── Floor Plan SVG ──────────────────────────────────────────────────────────
+function FloorPlan({reservadas, onSelectMesa}){
+  const [selected, setSelected] = useState(null);
+
+  const handleClick = (id) => {
+    if(reservadas.has(id)) return;
+    setSelected(id);
+    onSelectMesa(id);
+  };
+
+  // Grid config
+  const colW = 86; const rowH = 72;
+  const startX = 18; const startY = 28;
+  const rectW6 = 68; const rectH6 = 42;
+  const rectW4 = 54; const rectH4 = 34;
+
+  // Right column positions
+  const rightX = startX + 3*colW + 10;
+  const rightPositions = {
+    0: {cy: startY+22, r:20, tipo:'round8', id:'R1'},
+    1: {cy: startY+22+56, r:16, tipo:'round6', id:'R2'},
+    2: {cy: startY+22+56+52, r:16, tipo:'round6', id:'R3'},
+    3: {cy: startY+22+56+52+56, r:20, tipo:'round8', id:'R4'},
+    8: {cy: startY + 8*rowH + 22, r:20, tipo:'round8', id:'R5'},
+  };
+
+  // Build rect mesas
+  const rectMesas = MESAS.filter(m=>m.col!=='right');
+  const roundMesas = MESAS.filter(m=>m.col==='right');
+
+  return(
+    <svg viewBox="0 0 380 860" width="100%" style={{display:'block',maxWidth:'420px',margin:'0 auto'}}>
+      {/* Background */}
+      <rect x={0} y={0} width={380} height={860} fill="#f5f0e8" rx={8}/>
+
+      {/* PALCO */}
+      <rect x={270} y={430} width={100} height={160} rx={5} fill="#e0dbd0" stroke="#bbb" strokeWidth={1.5}/>
+      <text x={320} y={512} textAnchor="middle" dominantBaseline="middle"
+        fontSize={13} fontFamily="Playfair Display" fill="#666" letterSpacing={2}>PALCO</text>
+
+      {/* BALCÃO */}
+      <rect x={270} y={28} width={90} height={34} rx={4} fill="#e0dbd0" stroke="#bbb" strokeWidth={1.5}/>
+      <text x={315} y={45} textAnchor="middle" dominantBaseline="middle"
+        fontSize={11} fontFamily="DM Sans" fill="#666">BALCÃO</text>
+
+      {/* CHOPP */}
+      <rect x={180} y={810} width={90} height={30} rx={4} fill="#e0dbd0" stroke="#bbb" strokeWidth={1.5}/>
+      <text x={225} y={825} textAnchor="middle" dominantBaseline="middle"
+        fontSize={11} fontFamily="DM Sans" fill="#666">CHOPP</text>
+
+      {/* Retangulares */}
+      {rectMesas.map(m=>{
+        const isRect4 = m.tipo==='rect4';
+        const w = isRect4?rectW4:rectW6;
+        const h = isRect4?rectH4:rectH6;
+        const chairs = cadeiras[m.tipo];
+        const x = startX + m.col*colW + (colW-w)/2;
+        const y = startY + m.row*rowH + 14;
+        return(
+          <RectTable key={m.id} x={x} y={y} w={w} h={h} chairs={chairs}
+            id={m.id} reserved={reservadas.has(m.id)}
+            selected={selected===m.id}
+            onClick={()=>handleClick(m.id)}
+          />
+        );
+      })}
+
+      {/* Redondas */}
+      {Object.entries(rightPositions).map(([rowKey, cfg])=>{
+        const isRes = reservadas.has(cfg.id);
+        const isSel = selected===cfg.id;
+        return(
+          <RoundTable key={cfg.id}
+            cx={rightX+cfg.r+8} cy={cfg.cy}
+            r={cfg.r} chairs={cadeiras[cfg.tipo]}
+            id={cfg.id} reserved={isRes} selected={isSel}
+            onClick={()=>handleClick(cfg.id)}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+// ─── Modal ───────────────────────────────────────────────────────────────────
+function Modal({mesaId, onClose, onSuccess}){
+  const [nome, setNome] = useState('');
+  const [tel, setTel] = useState('');
+  const [data, setData] = useState('');
+  const [obs, setObs] = useState('');
+  const [pcd, setPcd] = useState(false);
+  const [status, setStatus] = useState(null); // null | 'loading' | 'ok' | 'err'
+
+  if(!mesaId) return null;
+
+  const mesa = MESAS.find(m=>m.id===mesaId);
+  const nCadeiras = cadeiras[mesa.tipo];
+  const valor = nCadeiras * PRECO;
+
+  const formatTel = v => {
+    v = v.replace(/\D/g,'');
+    if(v.length<=10) return v.replace(/(\d{2})(\d{4})(\d{0,4})/,'($1) $2-$3');
+    return v.replace(/(\d{2})(\d{5})(\d{0,4})/,'($1) $2-$3');
+  };
+
+  const enviar = async () => {
+    if(!nome.trim()||!tel.trim()||!data){
+      setStatus('val'); return;
+    }
+    setStatus('loading');
+    const payload = {mesa:mesaId, nome:nome.trim(), telefone:tel, data_reserva:data, observacao:obs.trim(), pcd, valor:`R$ ${valor.toFixed(2).replace('.',',')}`, cadeiras:nCadeiras};
+    try{
+      await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      setStatus('ok');
+      setTimeout(()=>onSuccess(mesaId),2000);
+    }catch(e){
+      setStatus('err');
+    }
+  };
+
+  const overlay = {
+    position:'fixed',inset:0,background:'rgba(26,18,9,0.8)',display:'flex',
+    alignItems:'center',justifyContent:'center',zIndex:9999,padding:'16px'
+  };
+  const modal = {
+    background:'#fff',borderRadius:'12px',width:'100%',maxWidth:'420px',
+    boxShadow:'0 24px 64px rgba(0,0,0,0.4)',overflow:'hidden'
+  };
+  const header = {
+    background:'#1a1209',padding:'20px 24px 16px',borderBottom:'2px solid #C9A84C'
+  };
+  const body = {padding:'20px 24px',display:'flex',flexDirection:'column',gap:'14px',maxHeight:'60vh',overflowY:'auto'};
+  const footer = {padding:'14px 24px',display:'flex',gap:'10px',borderTop:'1px solid #eee',background:'#fafafa'};
+  const input = {border:'1.5px solid #ddd',borderRadius:'6px',padding:'9px 12px',fontFamily:'DM Sans',fontSize:'0.9rem',width:'100%',outline:'none',background:'#FAF6EE'};
+  const label = {fontSize:'0.75rem',fontWeight:'600',color:'#3D2B1F',textTransform:'uppercase',letterSpacing:'0.4px',display:'block',marginBottom:'4px'};
+  const btnBase = {flex:1,padding:'11px',borderRadius:'6px',fontFamily:'DM Sans',fontSize:'0.9rem',fontWeight:'600',cursor:'pointer',border:'none'};
+
+  return(
+    <div style={overlay} onClick={e=>{if(e.target===e.currentTarget)onClose()}}>
+      <div style={modal}>
+        <div style={header}>
+          <div style={{fontFamily:'Playfair Display',fontSize:'1.3rem',color:'#C9A84C'}}>Mesa {mesaId}</div>
+          <div style={{color:'#aaa',fontSize:'0.82rem',marginTop:'4px'}}>{nCadeiras} cadeiras</div>
+          <div style={{color:'#E8C97A',fontWeight:'600',fontSize:'1.05rem',marginTop:'4px'}}>
+            R$ {valor.toFixed(2).replace('.',',')}
+          </div>
+        </div>
+
+        <div style={body}>
+          {status==='val'&&<div style={{background:'#fdecea',color:'#c62828',padding:'8px 12px',borderRadius:'6px',fontSize:'0.82rem'}}>Preencha nome, telefone e data.</div>}
+          {status==='loading'&&<div style={{background:'#fff8e1',color:'#f57f17',padding:'8px 12px',borderRadius:'6px',fontSize:'0.82rem'}}>Enviando reserva…</div>}
+          {status==='ok'&&<div style={{background:'#e8f5e9',color:'#2e7d32',padding:'8px 12px',borderRadius:'6px',fontSize:'0.82rem'}}>✓ Reserva confirmada!</div>}
+          {status==='err'&&<div style={{background:'#fdecea',color:'#c62828',padding:'8px 12px',borderRadius:'6px',fontSize:'0.82rem'}}>Erro ao enviar. Tente novamente.</div>}
+
+          <div>
+            <label style={label}>Nome completo *</label>
+            <input style={input} value={nome} onChange={e=>setNome(e.target.value)} placeholder="Seu nome completo" maxLength={100}/>
+          </div>
+          <div>
+            <label style={label}>Telefone com DDD *</label>
+            <input style={input} value={tel} onChange={e=>setTel(formatTel(e.target.value))} placeholder="(00) 00000-0000" maxLength={16}/>
+          </div>
+          <div>
+            <label style={label}>Data da reserva *</label>
+            <input style={input} type="date" value={data} onChange={e=>setData(e.target.value)}/>
+          </div>
+          <div>
+            <label style={label}>Observações</label>
+            <textarea style={{...input,resize:'vertical',minHeight:'66px'}} value={obs} onChange={e=>setObs(e.target.value)} placeholder="Alguma observação especial?"/>
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:'10px',background:'#F5F0E8',padding:'10px 14px',borderRadius:'6px',border:'1.5px solid #e0d8c8'}}>
+            <input type="checkbox" id="pcd" checked={pcd} onChange={e=>setPcd(e.target.checked)} style={{width:'18px',height:'18px',accentColor:'#C9A84C',cursor:'pointer',flexShrink:0}}/>
+            <label htmlFor="pcd" style={{fontSize:'0.88rem',color:'#3D2B1F',cursor:'pointer',lineHeight:'1.3'}}>
+              Sou pessoa com deficiência (PcD) ou necessidade especial
+            </label>
+          </div>
+        </div>
+
+        <div style={footer}>
+          <button style={{...btnBase,background:'#eee',color:'#555'}} onClick={onClose}>Cancelar</button>
+          <button style={{...btnBase,background:'#1a1209',color:'#C9A84C',border:'1.5px solid #C9A84C',opacity:status==='loading'||status==='ok'?0.5:1}}
+            onClick={enviar} disabled={status==='loading'||status==='ok'}>
+            Confirmar Reserva
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Legend ──────────────────────────────────────────────────────────────────
+function Legend(){
+  const dot = (color) => ({width:14,height:14,borderRadius:3,background:color,flexShrink:0});
+  const item = {display:'flex',alignItems:'center',gap:7,fontSize:'0.78rem',color:'#FAF6EE'};
+  return(
+    <div style={{display:'flex',gap:20,flexWrap:'wrap'}}>
+      <div style={item}><div style={dot('#1e5c38')}/>Disponível</div>
+      <div style={item}><div style={dot('#C9A84C')}/>Selecionada</div>
+      <div style={item}><div style={dot('#5a5a5a')}/>Reservada</div>
+    </div>
+  );
+}
+
+// ─── App ─────────────────────────────────────────────────────────────────────
+function App(){
+  const [reservadas, setReservadas] = useState(new Set());
+  const [mesaSelecionada, setMesaSelecionada] = useState(null);
+  const [loadingReservas, setLoadingReservas] = useState(true);
+
+  useEffect(()=>{
+    (async()=>{
+      try{
+        const r = await fetch(SCRIPT_URL+'?nocache='+Date.now());
+        const data = await r.json();
+        if(data.reservadas) setReservadas(new Set(data.reservadas.map(String)));
+      }catch(e){ console.warn('Reservas não carregadas:', e); }
+      finally{ setLoadingReservas(false); }
+    })();
+  },[]);
+
+  const handleSuccess = (id) => {
+    setReservadas(prev => new Set([...prev, id]));
+    setMesaSelecionada(null);
+  };
+
+  return(
+    <div style={{minHeight:'100vh',background:'#1a1209',display:'flex',flexDirection:'column'}}>
+      {/* Header */}
+      <div style={{background:'#1a1209',borderBottom:'2px solid #C9A84C',padding:'16px 24px',display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+        <div>
+          <div style={{fontFamily:'Playfair Display',fontSize:'1.4rem',color:'#C9A84C'}}>Reserva de Mesas</div>
+          <div style={{fontSize:'0.78rem',color:'#888',marginTop:2}}>Clique em uma mesa disponível para reservar</div>
+        </div>
+        <Legend/>
+      </div>
+
+      {/* Loading */}
+      {loadingReservas&&(
+        <div style={{textAlign:'center',color:'#C9A84C',padding:'12px',fontSize:'0.85rem'}}>
+          Carregando disponibilidade…
+        </div>
+      )}
+
+      {/* Floor Plan */}
+      <div style={{flex:1,padding:'20px 16px',display:'flex',justifyContent:'center'}}>
+        <div style={{background:'#fff',borderRadius:'10px',boxShadow:'0 8px 32px rgba(0,0,0,0.4)',overflow:'hidden',width:'100%',maxWidth:'420px'}}>
+          <FloorPlan reservadas={reservadas} onSelectMesa={setMesaSelecionada}/>
+        </div>
+      </div>
+
+      {/* Modal */}
+      <Modal
+        mesaId={mesaSelecionada}
+        onClose={()=>setMesaSelecionada(null)}
+        onSuccess={handleSuccess}
+      />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
