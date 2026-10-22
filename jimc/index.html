@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JIMC Serralheria</title>
+<meta name="description" content="JIMC Serralheria — estruturas metálicas, portões, grades e containers de lixo sob medida."/>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#111412;--surface:#1a1f1c;--line:#2a312d;
+  --text:#eef1ef;--muted:#9aa49e;
+  --green:#1f5a45;--green-light:#2e7d61;--accent:#f0a23b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+a{color:inherit;text-decoration:none}
+img{display:block;max-width:100%}
+.wrap{max-width:1140px;margin:0 auto;padding:0 16px}
+h1,h2,h3{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+
+/* Header */
+header{position:sticky;top:0;z-index:10;background:rgba(17,20,18,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:.04em}
+.logo span{color:var(--accent)}
+nav{display:flex;gap:24px;align-items:center}
+nav a{font-size:.9rem;color:var(--muted)}
+nav a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#1a1209;font-weight:600;padding:12px 22px;border-radius:6px;transition:transform .15s,background .15s}
+.btn:hover{background:#ffb653;transform:translateY(-1px)}
+.btn-sm{padding:8px 16px;font-size:.9rem}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.btn-ghost:hover{background:var(--surface)}
+
+/* Hero */
+.hero{position:relative;min-height:82vh;display:flex;align-items:flex-end;background:url(img/estrutura-cobertura.jpg) center/cover}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(17,20,18,.25) 0%,rgba(17,20,18,.95) 85%)}
+.hero .wrap{position:relative;padding-bottom:64px;width:100%}
+.tag{display:inline-block;font-size:.8rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.12em;margin-bottom:12px}
+.hero h1{font-size:clamp(2.4rem,7vw,4.6rem);max-width:780px}
+.hero p{font-size:1.15rem;color:#d3d9d5;max-width:560px;margin:16px 0 28px}
+.hero .actions{display:flex;gap:12px;flex-wrap:wrap}
+
+/* Sections */
+section{padding:80px 0}
+.section-head{margin-bottom:40px}
+.section-head h2{font-size:clamp(1.8rem,4vw,2.6rem)}
+.section-head p{color:var(--muted);max-width:560px;margin-top:8px}
+
+/* Serviços */
+.services{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.service{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px}
+.service .num{font-family:'Oswald',sans-serif;color:var(--accent);font-size:.95rem}
+.service h3{font-size:1.25rem;margin:8px 0}
+.service p{color:var(--muted);font-size:.95rem}
+
+/* Galeria */
+#trabalhos{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:220px;gap:12px;grid-auto-flow:dense}
+.gallery figure{position:relative;overflow:hidden;border-radius:8px;cursor:zoom-in;background:#000}
+.gallery img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
+.gallery figure:hover img{transform:scale(1.05)}
+.gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:24px 14px 12px;font-size:.88rem;font-weight:500;background:linear-gradient(transparent,rgba(0,0,0,.8))}
+.g-wide{grid-column:span 2}
+.g-tall{grid-row:span 2}
+.g-big{grid-column:span 2;grid-row:span 2}
+
+/* Diferenciais */
+.why{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px}
+.why div{border-left:3px solid var(--green-light);padding-left:16px}
+.why strong{display:block;font-size:1.05rem;margin-bottom:4px}
+.why span{color:var(--muted);font-size:.95rem}
+
+/* CTA */
+.cta{background:var(--green);border-radius:14px;padding:48px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cta h2{font-size:clamp(1.6rem,4vw,2.4rem)}
+.cta p{color:#cfe3da;margin-top:6px}
+.cta .phone{font-family:'Oswald',sans-serif;font-size:1.6rem;margin-top:10px;display:block}
+
+footer{padding:32px 0;border-top:1px solid var(--line);color:var(--muted);font-size:.85rem}
+footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* WhatsApp flutuante */
+.wa-float{position:fixed;right:16px;bottom:16px;width:56px;height:56px;border-radius:50%;background:#25d366;display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.4);z-index:20}
+.wa-float svg{width:30px;height:30px;fill:#fff}
+
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
+.lightbox.open{display:flex}
+.lightbox img{max-height:90vh;max-width:100%;border-radius:6px}
+.lightbox button{position:absolute;top:12px;right:16px;background:none;border:0;color:#fff;font-size:2.2rem;cursor:pointer}
+
+@media (max-width:820px){
+  nav a:not(.btn){display:none}
+  .gallery{grid-template-columns:repeat(2,1fr);grid-auto-rows:180px}
+  .g-wide{grid-column:span 2}
+  section{padding:56px 0}
+  .cta{padding:32px 20px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a href="#" class="logo">JIM<span>C</span></a>
+    <nav>
+      <a href="#servicos">Serviços</a>
+      <a href="#trabalhos">Trabalhos</a>
+      <a href="#contato">Contato</a>
+      <a class="btn btn-sm" href="https://wa.me/5561986091222" target="_blank" rel="noopener">Orçamento</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <span class="tag">Serralheria</span>
+    <h1>Estruturas metálicas feitas sob medida</h1>
+    <p>Coberturas, portões, grades e containers de lixo. Do projeto à instalação, com acabamento de quem entende de ferro.</p>
+    <div class="actions">
+      <a class="btn" href="https://wa.me/5561986091222" target="_blank" rel="noopener">Pedir orçamento no WhatsApp</a>
+      <a class="btn btn-ghost" href="#trabalhos">Ver trabalhos</a>
+    </div>
+  </div>
+</section>
+
+<section id="servicos">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="tag">O que fazemos</span>
+      <h2>Serviços</h2>
+    </div>
+    <div class="services">
+      <div class="service"><span class="num">01</span><h3>Estruturas e coberturas</h3><p>Treliças, vigas e pilares metálicos para áreas de lazer, garagens e galpões.</p></div>
+      <div class="service"><span class="num">02</span><h3>Portões e fachadas</h3><p>Portões de correr e de abrir, gradis e acabamentos para residências e condomínios.</p></div>
+      <div class="service"><span class="num">03</span><h3>Grades e proteções</h3><p>Grades para janelas e gaiolas de proteção para condensadoras de ar-condicionado.</p></div>
+      <div class="service"><span class="num">04</span><h3>Containers de lixo</h3><p>Containers com rodízios e tampas articuladas, personalizados com identificação.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="trabalhos">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="tag">Portfólio</span>
+      <h2>Trabalhos realizados</h2>
+      <p>Alguns dos serviços que entregamos. Clique para ampliar.</p>
+    </div>
+    <div class="gallery">
+      <figure class="g-wide"><img src="img/estrutura-cobertura.jpg" alt="Estrutura metálica de cobertura em área de lazer" loading="lazy"/><figcaption>Estrutura de cobertura</figcaption></figure>
+      <figure class="g-tall"><img src="img/cobertura-piscina.jpg" alt="Estrutura metálica ao lado de piscina" loading="lazy"/><figcaption>Cobertura área da piscina</figcaption></figure>
+      <figure class="g-tall"><img src="img/grade-ar-condicionado.jpg" alt="Gaiola de proteção para ar-condicionado" loading="lazy"/><figcaption>Proteção para ar-condicionado</figcaption></figure>
+      <figure class="g-wide"><img src="img/portao-residencial.jpg" alt="Portão de garagem em residencial" loading="lazy"/><figcaption>Portão residencial</figcaption></figure>
+      <figure class="g-big"><img src="img/container-lixo.jpg" alt="Container de lixo com rodízios" loading="lazy"/><figcaption>Container de lixo</figcaption></figure>
+      <figure class="g-tall"><img src="img/container-aberto.jpg" alt="Container de lixo com tampas abertas" loading="lazy"/><figcaption>Tampas articuladas</figcaption></figure>
+      <figure class="g-tall"><img src="img/container-bloco-d.jpg" alt="Container de lixo identificado para condomínio" loading="lazy"/><figcaption>Container para condomínio</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="why">
+      <div><strong>Sob medida</strong><span>Cada peça é feita para o seu espaço.</span></div>
+      <div><strong>Acabamento</strong><span>Pintura anticorrosiva e solda reforçada.</span></div>
+      <div><strong>Instalação</strong><span>Entregamos e instalamos no local.</span></div>
+      <div><strong>Orçamento rápido</strong><span>Mande fotos e medidas pelo WhatsApp.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="contato" style="padding-top:0">
+  <div class="wrap">
+    <div class="cta">
+      <div>
+        <h2>Vamos fazer seu projeto?</h2>
+        <p>Fale direto com a JIMC e receba seu orçamento.</p>
+        <a class="phone" href="tel:+5561986091222">(61) 98609-1222</a>
+      </div>
+      <a class="btn" href="https://wa.me/5561986091222" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span><strong>JIMC</strong> Serralheria</span>
+    <span>&copy; <span id="year"></span> JIMC. Todos os direitos reservados.</span>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/5561986091222" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 32 32"><path d="M16 3C9 3 3.3 8.6 3.3 15.6c0 2.3.6 4.5 1.8 6.5L3 29l7.1-2.1c1.9 1 4 1.6 6 1.6 7 0 12.7-5.7 12.7-12.7S23 3 16 3zm0 23.2c-1.9 0-3.8-.5-5.4-1.5l-.4-.2-4.2 1.2 1.2-4.1-.3-.4c-1.1-1.7-1.7-3.6-1.7-5.6C5.2 9.7 10 5 16 5s10.7 4.7 10.7 10.6S21.9 26.2 16 26.2zm5.9-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.2-.2-.3 0-.5.1-.7l.5-.6c.2-.2.2-.3.3-.6.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.7s1.2 3.2 1.4 3.4c.2.2 2.4 3.6 5.7 5 .8.3 1.4.5 1.9.7.8.3 1.5.2 2.1.1.6-.1 1.9-.8 2.2-1.5.3-.7.3-1.4.2-1.5-.1-.2-.3-.3-.6-.4z"/></svg>
+</a>
+
+<div class="lightbox" id="lightbox">
+  <button aria-label="Fechar">&times;</button>
+  <img alt=""/>
+</div>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+const lb = document.getElementById('lightbox');
+const lbImg = lb.querySelector('img');
+document.querySelectorAll('.gallery img').forEach(img => {
+  img.parentElement.addEventListener('click', () => {
+    lbImg.src = img.src; lbImg.alt = img.alt; lb.classList.add('open');
+  });
+});
+lb.addEventListener('click', e => { if (e.target !== lbImg) lb.classList.remove('open'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
+</script>
+</body>
+</html>
